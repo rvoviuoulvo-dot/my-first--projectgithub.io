@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Computer - Самирчони вахдати</title>
+
+<link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+.btn{
+  padding:3px 8px;
+  font-size:10px;
+  border-radius:5px;
+  cursor: pointer;
+}
+/* Стилҳои махсус барои тирезаи регистратсия */
+.auth-modal {
+    display: none; 
+    position: fixed; 
+    z-index: 9999; 
+    left: 0; top: 0; 
+    width: 100%; height: 100%; 
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(5px);
+}
+.auth-content {
+    background: #0d1117;
+    border: 1px solid #00ff00;
+    margin: 10% auto;
+    padding: 25px;
+    width: 320px;
+    border-radius: 15px;
+    text-align: center;
+    font-family: 'Roboto', sans-serif;
+}
+.auth-content h2 { font-family: 'Orbitron', sans-serif; color: #00ff00; margin-bottom: 20px; }
+.auth-content input {
+    width: 90%;
+    padding: 10px;
+    margin: 8px 0;
+    background: #161b22;
+    border: 1px solid #30363d;
+    color: white;
+    border-radius: 5px;
+}
+.auth-submit {
+    width: 97%;
+    padding: 10px;
+    background: #00ff00;
+    border: none;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+/* Стили капча барои зебоӣ */
+.captcha-box {
+    background: #222; 
+    padding: 10px; 
+    color: #00ff00; 
+    font-weight: bold; 
+    font-style: italic; 
+    border-radius: 5px; 
+    letter-spacing: 3px; 
+    border: 1px solid #333;
+}
+</style>
+
+<!-- Пайваст кардани EmailJS -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script type="text/javascript">
+   (function(){
+      emailjs.init("i3Ce9iO_5E60t4wga"); 
+   })();
+</script>
+
+</head>
+<body>
+
+ 
+<header>
+  <div class="logo">Colden Coin</div>
+
+  <nav>
+    <ul>
+      <li><a href="index.html">Главная</a></li>
+      <li><a href="pages/catalog.html">Каталог</a></li>
+      <li><a href="pages/promotions.html">Аксияҳо</a></li>
+      <li><a href="pages/about.html">Дар бораи мо</a></li>
+      <li><a href="pages/contact.html">Контакт</a></li>
+    </ul>
+  </nav>
+
+  <!-- Кнопкаҳо бо функсияҳои пайвастшуда -->
+  <button class="btn reg" onclick="openAuth('reg-section')">Регистрация</button>
+  <button class="btn login" onclick="openAuth('login-section')">Вход</button>
+  
+
+  <button id="dark-mode-toggle">🌙</button>
+</header>
+
+<!-- БЛОКИ РЕГИСТРАТСИЯ ВА ЛОГИН (МОДАЛКА) -->
+<div id="auth-modal-main" class="auth-modal">
+    <div class="auth-content">
+        <span onclick="closeAuth()" style="float:right; color:white; cursor:pointer; font-size: 20px;">&times;</span>
+        
+        <!-- 1. СЕКСИЯИ РЕГИСТРАТСИЯ -->
+        <div id="reg-section">
+            <h2 style="color: #00ff00;">Регистрация</h2>
+            <input type="text" id="reg-login" placeholder="Логин">
+            <input type="email" id="reg-email" placeholder="E-mail">
+            <input type="password" id="reg-pass" placeholder="Парол">
+            <input type="text" id="reg-ref" placeholder="Коди реферал (ихтиёрӣ)">
+            
+            <div style="display: flex; align-items: center; justify-content: center; margin: 15px 0; gap: 10px;">
+                <span id="captcha-code" class="captcha-box">X7y2P</span>
+                <button type="button" onclick="generateCaptcha()" style="background: #161b22; border: 1px solid #00ff00; border-radius: 5px; padding: 8px; cursor: pointer;">
+                    <span>🔄</span>
+                </button>
+            </div>
+            
+            <input type="text" id="reg-captcha-input" placeholder="Коди капча">
+            <button class="auth-submit" onclick="handleRegister()">Давом додан</button>
+        </div>
+
+        <!-- 2. СЕКСИЯИ ЛОГИН (ВАЙТИ) -->
+        <div id="login-section" style="display:none;">
+            <h2 style="color: #00ff00;">Вход</h2>
+            <input type="text" id="login-user" placeholder="Логин ё Email">
+            <input type="password" id="login-pass" placeholder="Парол">
+
+            <div style="margin: 10px 0;">
+                <a href="#" onclick="showSection('forgot-section')" style="color: #00ccff; font-size: 14px; text-decoration: none;">Паролро фаромӯш кардам?</a>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: center; margin: 15px 0; gap: 15px;">
+                <span id="captcha-code-login" class="captcha-box">L9pQ2</span>
+                <button type="button" onclick="generateCaptchaLogin()" style="background: none; border: none; cursor: pointer;">🔄</button>
+            </div>
+
+            <input type="text" id="login-captcha-input" placeholder="Коди капча">
+            <button class="auth-submit" style="background: #00ccff; color: #000;" onclick="handleLogin()">Ворид шудан</button>
+        </div>
+
+        <!-- 3. СЕКСИЯИ БАРҚАРОРСОЗӢ (ФИРИСТОДАНИ КОД) -->
+        <div id="forgot-section" style="display:none;">
+            <h2 style="color: #00ccff;">Восстановление</h2>
+            <p style="color: gray; font-size: 13px; margin-bottom: 10px;">Email-и худро ворид кунед:</p>
+            <input type="email" id="forgot-email" placeholder="E-mail">
+            
+            <!-- Капча барои барқарорсозӣ -->
+            <div style="display: flex; align-items: center; justify-content: center; margin: 15px 0; gap: 10px;">
+                <span id="captcha-code-forgot" class="captcha-box" style="color: #00ccff; border-color: #00ccff;">-----</span>
+                <button type="button" onclick="generateCaptchaForgot()" style="background: #161b22; border: 1px solid #00ccff; border-radius: 5px; padding: 8px; cursor: pointer;">
+                    <span>🔄</span>
+                </button>
+            </div>
+            <input type="text" id="forgot-captcha-input" placeholder="Коди капча">
+
+            <button class="auth-submit" style="background: #00ccff; color: #000; margin-top: 15px;" onclick="handleForgot()">Фиристодани код</button>
+            <p onclick="showSection('login-section')" style="color: white; cursor: pointer; font-size: 12px; margin-top: 15px; text-decoration: underline;">Ба қафо</p>
+        </div>
+
+        <!-- 4. СЕКСИЯИ ТАСДИҚ (OTP) ҲАНГОМИ РЕГИСТРАТСИЯ -->
+        <div id="verify-section" style="display:none;">
+            <h2>Тасдиқ</h2>
+            <p style="color:gray; font-size:12px;">Кодро аз почта ворид кунед</p>
+            <input type="text" id="v-code" placeholder="Коди 6-рақама">
+            <button class="auth-submit" onclick="finalVerify()">Тасдиқ кардан</button>
+        </div>
+
+        <!-- 5. СЕКСИЯИ ПАРОЛИ НАВ (БАЪДИ ФИРИСТОДАНИ КОД) -->
+        <div id="reset-password-section" style="display:none;">
+            <h2 style="color: #ffcc00;">Пароли нав</h2>
+            <p style="color: gray; font-size: 12px; margin-bottom: 10px;">Кодро аз почта ва пароли навро ворид кунед</p>
+            <input type="text" id="v-code-forgot" placeholder="Коди тасдиқ">
+            <input type="password" id="new-password" placeholder="Пароли нав">
+            <button class="auth-submit" style="background: #ffcc00; color: #000;" onclick="finalResetPassword()">💾 Сохранить</button>
+        </div>
+    </div>
+</div>
+
+
+
+<div id="user-panel" class="sidebar-cabinet" style="display:none;">
+    <div class="sidebar-header">
+        <div class="avatar-wrapper">
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User">
+        </div>
+        <p class="user-id">ID: <span id="profile-id">0</span></p>
+        <p class="user-name" id="profile-username">User</p>
+    </div>
+
+  <!-- Тугмаи кушодани меню -->
+<div class="menu-toggle" onclick="toggleSidebar()">
+    <span></span>
+    <span></span>
+    <span></span>
+</div> 
+
+    <div class="sidebar-nav">
+        <div class="nav-item" onclick="openAction('profile')">👤 Профиль</div>
+        <div class="nav-item" onclick="openAction('popolnit')">💳 Пополнить</div>
+        <div class="nav-item" onclick="openAction('vivist')">💸 Вывести</div>
+        <div class="nav-item" onclick="openAction('referal')">👥 Рефералы</div>
+        <div class="nav-item" onclick="openAction('settings')">⚙️ Настройки</div>
+        <div class="nav-item bonus-item" onclick="getBonus()">🎁 Ежедневный бонус</div>
+        <div class="nav-item logout-item" onclick="logout()">🚪 Выход</div>
+    </div>
+</div>
+
+<!-- ҚИСМИ АСОСӢ (HERO) -->
+<section id="hero">
+  <div class="hero-content">
+    <h1>Қувваи компютер дар дасти ту Самирчон</h1>
+    <p>Маҳсулоти беҳтарини компютер ва ноутбук бо нархҳои дастрас</p>
+    <button onclick="window.location.href='pages/catalog.html'">Харидро оғоз кун</button>
+  </div>
+</section>
+
+<footer>
+  <p>&copy; 2026 IT Computer. Ҳама ҳуқуқ маҳфуз аст.</p>
+</footer>
+
+<script src="js/auth.js"></script>
+<script src="js/script.js"></script>
+
+</body>
+</html>
